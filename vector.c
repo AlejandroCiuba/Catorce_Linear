@@ -40,105 +40,15 @@ vec* init_vec(int init_size, type data_type, bool fixed_length) {
     v->fixed_length = fixed_length;
 
     // Init the vector array
-    switch (data_type) {
+    void* arrv = malloc(get_data_size(data_type) * init_size);
+    if (arrv == NULL) {
 
-        case NO_TYPE:;
-
-            void* arrv = malloc(sizeof(void) * init_size);
-            if (arrv == NULL) {
-
-                free(v);
-                return NULL;
-            }
-            
-            v->array = arrv;
-            return v;
-
-        case CHAR:;
-
-            char* arrc = (char*)malloc(sizeof(char) * init_size);
-            if (arrc == NULL) {
-
-                free(v);
-                return NULL;
-            }
-
-            v->array = arrc;
-
-            for (int i = 0; i < init_size; i++)
-                ((char*)v->array)[i] = 0;
-
-            return v;
-
-        case INT32:;
-
-            int32_t* arr32 = (int32_t*)malloc(sizeof(int32_t) * init_size);
-            if (arr32 == NULL) {
-
-                free(v);
-                return NULL;
-            }
-
-            v->array = arr32;
-
-            for (int i = 0; i < init_size; i++)
-                ((int32_t*)v->array)[i] = 0;
-
-            return v;
-
-        case INT64:;
-
-            int64_t* arr64 = (int64_t*)malloc(sizeof(int64_t) * init_size);
-            if (arr64 == NULL) {
-
-                free(v);
-                return NULL;
-            }
-
-            v->array = arr64;
-
-            for (int i = 0; i < init_size; i++)
-                ((int64_t*)v->array)[i] = 0;
-
-            return v;
-
-        case FLOAT32:;
-
-            float* arrf = (float*)malloc(sizeof(float) * init_size);
-            if (arrf == NULL) {
-
-                free(v);
-                return NULL;
-            }
-
-            v->array = arrf;
-
-            for (int i = 0; i < init_size; i++)
-                ((float*)v->array)[i] = 0.0f;
-
-            return v;
-
-        case DOUBLE:;
-
-            double* arrd = (double*)malloc(sizeof(double) * init_size);
-            if (arrd == NULL) {
-
-                free(v);
-                return NULL;
-            }
-
-            v->array = arrd;
-
-            for (int i = 0; i < init_size; i++)
-                ((double*)v->array)[i] = 0.0f;
-
-            return v;
-
-        default:
-
-            free(v);
-            return NULL;
+        free(v);
+        return NULL;
     }
+
+    v->array = arrv;
+    return v;
 }
 
 /**
@@ -241,39 +151,7 @@ bool contains(const void* data, vec* v, char (*comparator)(const void* arg1, con
         // for a given data_type
         if (comparator != NULL) {
             if (comparator(data, v->array + i * data_size) == 0) return true;
-        } else {
-
-            switch (v->data_type) {
-
-                case CHAR:
-
-                    if (*(char*)(data) == ((char*)(v->array))[i]) return true;
-                    break;
-
-                case INT32:
-
-                    if (*(int32_t*)(data) == ((int32_t*)(v->array))[i]) return true;
-                    break;
-
-                case INT64:
-
-                    if (*(int64_t*)(data) == ((int64_t*)(v->array))[i]) return true;
-                    break;
-
-                case FLOAT32:
-
-                    if (*(float*)(data) == ((float*)(v->array))[i]) return true;
-                    break;
-
-                case DOUBLE:
-
-                    if (*(double*)(data) == ((double*)(v->array))[i]) return true;
-                    break;
-
-                default:
-                    return false;
-            }
-        }
+        } else if (strncmp(v->array + i * data_size, (char*)data, data_size) == 0) return true;
     }
 
     return false;

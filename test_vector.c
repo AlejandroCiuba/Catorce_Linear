@@ -89,7 +89,11 @@ test test_init_vec(vec* v) {
     if (test_v->fixed_length != v->fixed_length) goto FAILED_TEST_INIT_VEC;
 
     // NO_TYPE passes
-    if (data_type == NO_TYPE) return PASSED;
+    if (data_type == NO_TYPE) {
+
+        teardown(test_v);
+        return PASSED;
+    }
 
     for (int i = 0; i < v->size; i++)
         if (!comp_data(test_v->array + i * data_size, v->array + i * data_size, data_type)) goto FAILED_TEST_INIT_VEC;
@@ -110,58 +114,26 @@ test test_append(vec* v) {
     if (data_type == NO_TYPE) return PASSED;
 
     vec* test_v = init_vec(v->size, data_type, v->fixed_length);
+    if (test_v == NULL) return FAILED;
 
     // Init random seed
     srand(time(NULL));
-    int append_length = v->size;
 
     // Fill v with random values
     for (int i = 0; i < v->size; i++) {
-        switch (data_type) {
 
-            case CHAR:;
-
-                char valc = (char)(rand() % init_size);
-                memcpy(v->array + i * data_size, &valc, data_size);
-                break;
-
-            case INT32:;
-
-                int32_t val32 = (int32_t)(rand() % init_size);
-                memcpy(v->array + i * data_size, &val32, data_size);
-                break;
-
-            case INT64:;
-
-                int64_t val64 = (int64_t)(rand() % init_size);
-                memcpy(v->array + i * data_size, &val64, data_size);
-                break;
-
-            case FLOAT32:;
-
-                float valf = (float)(rand() % init_size);
-                memcpy(v->array + i * data_size, &valf, data_size);
-                break;
-
-            case DOUBLE:;
-
-                double vald = (double)(rand() % init_size);
-                memcpy(v->array + i * data_size, &vald, data_size);
-                break;
-
-            default:
-                return FAILED;
-        }
+        int64_t val64 = (int64_t)(rand() % init_size);
+        memcpy(v->array + i * data_size, &val64, data_size);
     }
 
     // Test without upsize
-    for (int i = 0; i < append_length; i++)
+    for (int i = 0; i < v->size; i++)
         if ((test_v = append(v->array + i * data_size, test_v, false)) == NULL) goto FAILED_TEST_APPEND;
 
     for (int i = 0; i < init_size; i++) {
         if (!comp_data(test_v->array + (i + init_size) * data_size, v->array + i * data_size, data_type)) goto FAILED_TEST_APPEND;
         char zero_test = 0x00 >> data_size;
-        //if(strncmp(test_v->array + i * data_size, &zero_test, data_size)) goto FAILED_TEST_APPEND;
+        if (strncmp(test_v->array + i * data_size, &zero_test, data_size)) goto FAILED_TEST_APPEND;
     }
 
     teardown(test_v);
@@ -173,11 +145,76 @@ FAILED_TEST_APPEND:
 }
 
 test test_replace(vec* v) {
+
+    if (v == NULL) return FAILED;
+
+    // NO_TYPE passes
+    if (data_type == NO_TYPE) return PASSED;
+
+    vec* test_v = init_vec(v->size, data_type, v->fixed_length);
+    if (test_v == NULL) return FAILED;
+
+    // Init random seed
+    srand(time(NULL));
+    int64_t comp_arr[v->size];
+
+    // Fill test_v with random values
+    for (int i = 0; i < v->size; i++) {
+
+        int64_t val64 = (int64_t)(rand() % init_size);
+        if (!replace(&val64, i, test_v)) goto FAILED_TEST_REPLACE;
+
+        // Add to comp_arr
+        comp_arr[i] = val64;
+    }
+
+    // Now check
+    for (int i = 0; i < v->size; i++) {
+        if (strncmp(test_v->array + i * data_size, (char*)&comp_arr[i], data_size)) goto FAILED_TEST_REPLACE;
+    }
+
     return PASSED;
+
+FAILED_TEST_REPLACE:
+    teardown(test_v);
+    return FAILED;
 }
 
 test test_contains(vec* v) {
+
+    if (v == NULL) return FAILED;
+
+    // NO_TYPE passes
+    if (data_type == NO_TYPE) return PASSED;
+
+    vec* test_v = init_vec(v->size, data_type, v->fixed_length);
+    if (test_v == NULL) return FAILED;
+
+    // Init random seed
+    srand(time(NULL));
+    int64_t comp_arr[v->size];
+
+    // Fill test_v with random values
+    for (int i = 0; i < v->size; i++) {
+
+        int64_t val64 = (int64_t)(rand() % init_size);
+        if (!replace(&val64, i, test_v)) goto FAILED_TEST_CONTAINS;
+
+        // Add to comp_arr
+        comp_arr[i] = val64;
+    }
+
+    // Now check
+    for (int i = 0; i < v->size; i++) {
+        if (!contains((void*)(comp_arr + i), test_v, NULL)) goto FAILED_TEST_CONTAINS;
+    }
+
     return PASSED;
+
+
+FAILED_TEST_CONTAINS:
+    teardown(test_v);
+    return FAILED;
 }
 
 test test_get_deep(vec* v) {
@@ -234,10 +271,10 @@ vec* prefixtures(type data_type, int init_size, bool fixed_length) {
                 free(v);
                 return NULL;
             }
-            
+
             v->array = arrv;
             return v;
-            
+
         case CHAR:;
 
             char* arrc = (char*)malloc(sizeof(char) * init_size);

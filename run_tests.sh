@@ -6,9 +6,6 @@ TEST_FILES=("test")
 
 for test in ${TEST_FILES[@]}
 do
-    # Make the test_file
-    make
-
     for type in ${!DATA_TYPES[@]}
     do 
         echo "RUNNING ${test} FOR TYPE ${DATA_TYPES[$type]}..."
@@ -16,9 +13,27 @@ do
         echo ""
     done
 
-    echo""
     echo "TESTS RAN FOR TEST FILE ${test}..."
-
+    
 done
 
-echo "\nDONE."
+echo ""
+echo "FINISHED TESTS, RUNNING VALGRIND..."
+
+for test in ${TEST_FILES[@]}
+do
+    # Make the test_file
+    make
+
+    for type in ${!DATA_TYPES[@]}
+    do 
+        echo "RUNNING VALGRIND FOR ${test} FOR TYPE ${DATA_TYPES[$type]}..."
+        valgrind --leak-check=full -s ./${test} -d ${type} -n 5
+        echo ""
+    done
+
+    echo "TESTS RAN FOR TEST FILE ${test}..."
+    
+done
+
+echo "DONE."
