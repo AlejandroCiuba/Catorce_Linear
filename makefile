@@ -8,6 +8,8 @@ CCFLAGS_OPT = -Os
 # gdb and valgrind support respectively
 CCFLAGS_DEBUG = -g3 -ggdb3
 CCFLAGS = ${CCFLAGS_ERRORS} ${CCFLAGS_OPT} ${CCFLAGS_DEBUG}
+# Flags for compiling test cases
+CCFLAGS_TESTS = ${CCFLAGS_DEBUG}
 
 OBJS = vector.o
 
@@ -16,7 +18,7 @@ all: vector test_vector
 .PHONY: vector test
 
 test_vector: test_vector.c
-	$(CC) -o test test_vector.c $(OBJS) $(CCFLAGS)
+	$(CC) -o test test_vector.c $(OBJS) $(CCFLAGS_TESTS)
 	
 vector: vector.c
 	$(CC) -c vector.c $(CCFLAGS)

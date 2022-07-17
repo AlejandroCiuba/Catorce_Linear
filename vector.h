@@ -33,7 +33,7 @@ typedef enum { NO_TYPE, CHAR, INT32, INT64, FLOAT32, DOUBLE } type;
 typedef struct vector {
 
     // An array to any data type listed
-    void** array;
+    void* array;
     int size;
     type data_type;
     bool fixed_length;
@@ -71,16 +71,16 @@ vec* append(const void* data, vec* v, bool double_size);
 
 /**
  * @brief Replace the value at a given vector position.
- * If you have v->fixed_length == true and index == size,
- * it will return NULL. Otherwise, it will return v unchanged
- * if index >= size or data == NULL.
+ * If you have v->fixed_length == true and index == size, or
+ * if index >= size or data == NULL. it will return false. 
+ * Otherwise, it will return true.
  *
  * @param data Data to replace current data. Is not type-checked.
  * @param index Index at which to replace.
  * @param v Vector to have component replaced.
- * @return vec* | NULL
+ * @return bool
  */
-vec* replace(const void* data, int index, vec* v);
+bool replace(const void* data, int index, vec* v);
 
 /**
  * @brief Checks if a vector contains a value. Can take a user supplied
@@ -104,16 +104,6 @@ bool contains(const void* data, vec* v, char (*comparator)(const void* arg1, con
  * @return void* (Cast to type) | NULL
  */
 void* get_deep(int index, vec* v);
-
-/**
- * @brief Get the shallow-copy of the component at index position.
- * REMEMBER, NO UNWARRANTED CHANGES!!!
- *
- * @param index Component to be gotten. If index > v->size, returns NULL.
- * @param v Vector. If NULL returns NULL.
- * @return void* (Cast to type) | NULL
- */
-void* get_shallow(int index, vec* v);
 
 /**
  * @brief Gets the appropriate size_t for v->data_type.
