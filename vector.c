@@ -31,7 +31,7 @@ vec* init_vec(int init_size, type data_type, bool fixed_length) {
     if (init_size == 0) return NULL;
 
     // Init vec struct
-    vec* v = (vec*) malloc(sizeof(vec));
+    vec* v = (vec*)malloc(sizeof(vec));
     if (v == NULL) return NULL;
 
     // Init the size, data_type, and fixed_length metadata
@@ -42,87 +42,95 @@ vec* init_vec(int init_size, type data_type, bool fixed_length) {
     // Init the vector array
     switch (data_type) {
 
-        case NO_TYPE:
+        case NO_TYPE:;
 
+            void* arrv = malloc(sizeof(void) * init_size);
+            if (arrv == NULL) {
+
+                free(v);
+                return NULL;
+            }
+            
+            v->array = arrv;
             return v;
 
         case CHAR:;
 
-            char* arrc = (char*) malloc(sizeof(char) * init_size);
-            if (arrc == NULL) { 
+            char* arrc = (char*)malloc(sizeof(char) * init_size);
+            if (arrc == NULL) {
 
-                free(v); 
-                return NULL; 
+                free(v);
+                return NULL;
             }
 
             v->array = arrc;
 
-            for (int i = 0; i < init_size; i++) 
-                ((char*) v->array)[i] = 0;
+            for (int i = 0; i < init_size; i++)
+                ((char*)v->array)[i] = 0;
 
             return v;
 
         case INT32:;
 
-            int32_t* arr32 = (int32_t*) malloc(sizeof(int32_t) * init_size);
-            if (arr32 == NULL) { 
+            int32_t* arr32 = (int32_t*)malloc(sizeof(int32_t) * init_size);
+            if (arr32 == NULL) {
 
-                free(v); 
-                return NULL; 
+                free(v);
+                return NULL;
             }
 
             v->array = arr32;
 
-            for (int i = 0; i < init_size; i++) 
-                ((int32_t*) v->array)[i] = 0;
+            for (int i = 0; i < init_size; i++)
+                ((int32_t*)v->array)[i] = 0;
 
             return v;
 
         case INT64:;
 
-            int64_t* arr64 = (int64_t*) malloc(sizeof(int64_t) * init_size);
-            if (arr64 == NULL) { 
+            int64_t* arr64 = (int64_t*)malloc(sizeof(int64_t) * init_size);
+            if (arr64 == NULL) {
 
-                free(v); 
-                return NULL; 
+                free(v);
+                return NULL;
             }
 
             v->array = arr64;
 
-            for (int i = 0; i < init_size; i++) 
-                ((int64_t*) v->array)[i] = 0;
+            for (int i = 0; i < init_size; i++)
+                ((int64_t*)v->array)[i] = 0;
 
             return v;
 
         case FLOAT32:;
 
-            float* arrf = (float*) malloc(sizeof(float) * init_size);
-            if (arrf == NULL) { 
+            float* arrf = (float*)malloc(sizeof(float) * init_size);
+            if (arrf == NULL) {
 
-                free(v); 
-                return NULL; 
+                free(v);
+                return NULL;
             }
 
             v->array = arrf;
 
-            for (int i = 0; i < init_size; i++) 
-                ((float*) v->array)[i] = 0.0f;
+            for (int i = 0; i < init_size; i++)
+                ((float*)v->array)[i] = 0.0f;
 
             return v;
 
         case DOUBLE:;
 
-            double* arrd = (double*) malloc(sizeof(double) * init_size);
-            if (arrd == NULL) { 
+            double* arrd = (double*)malloc(sizeof(double) * init_size);
+            if (arrd == NULL) {
 
-                free(v); 
-                return NULL; 
+                free(v);
+                return NULL;
             }
 
             v->array = arrd;
 
-            for (int i = 0; i < init_size; i++) 
-                ((double*) v->array)[i] = 0.0f;
+            for (int i = 0; i < init_size; i++)
+                ((double*)v->array)[i] = 0.0f;
 
             return v;
 
@@ -150,6 +158,7 @@ vec* append(const void* data, vec* v, bool double_size) {
 
     // If double_size, upsize
     // Else, just insert
+    type data_type = v->data_type;
     int og_size = v->size;
     size_t data_size = get_data_size(v->data_type);
 
@@ -157,111 +166,36 @@ vec* append(const void* data, vec* v, bool double_size) {
 
         v = upsize(v);
 
-        if (v == NULL) return NULL; 
+        if (v == NULL) return NULL;
 
         // Insert
-        switch (v->data_type) {
-
-            case CHAR:
-
-                memcpy((char*)(v->array + og_size * data_size), (char*)data, data_size);
-                return v;
-
-            case INT32:
-
-                memcpy((int32_t*)(v->array + og_size * data_size), (int32_t*)data, data_size);
-                return v;
-
-            case INT64:
-
-                memcpy((int64_t*)(v->array + og_size * data_size), (int64_t*)data, data_size);
-                return v;
-
-            case FLOAT32:
-
-                memcpy((float*)(v->array + og_size * data_size), (float*)data, data_size);
-                return v;
-
-            case DOUBLE:
-
-                memcpy((double*)(v->array + og_size * data_size), (double*)data, data_size);
-                return v;
-
-            default:
-
-                free(v);
-                return NULL;
-        }
+        memcpy(v->array + og_size * data_size, data, data_size);
 
         return v;
 
     } else {
 
         // Initialize new vector
-        type data_type = v->data_type;
-
         vec* new_v = init_vec(og_size + 1, data_type, v->fixed_length);
-        if (new_v == NULL) return v; 
+        if (new_v == NULL) return v;
 
         // Copy data and insert
         // Insert
-        switch (v->data_type) {
+        for (int i = 0; i < og_size; i++)
+            memcpy(new_v->array + i * data_size, v->array + i * data_size, data_size);
 
-            case CHAR:
+        memcpy(new_v->array + og_size * data_size, data, data_size);
 
-                for(int i = 0; i < og_size; i++)
-                    ((char*) new_v->array)[i] = ((char*) v->array)[i];
+        free_vec(v);
 
-                memcpy((char*)(v->array + og_size * data_size), (char*)data, data_size);
-                return v;
-
-            case INT32:
-
-                for(int i = 0; i < og_size; i++)
-                        ((int32_t*) new_v->array)[i] = ((int32_t*) v->array)[i];
-
-                memcpy((int32_t*)(v->array + og_size * data_size), (int32_t*)data, data_size);
-                return v;
-
-            case INT64:
-
-                for(int i = 0; i < og_size; i++)
-                    ((int64_t*) new_v->array)[i] = ((int64_t*) v->array)[i];
-
-                memcpy((int64_t*)(v->array + og_size * data_size), (int64_t*)data, data_size);
-                return v;
-
-            case FLOAT32:
-
-                for(int i = 0; i < og_size; i++)
-                    ((float*) new_v->array)[i] = ((float*) v->array)[i];
-
-                memcpy((float*)(v->array + og_size * data_size), (float*)data, data_size);
-                return v;
-
-            case DOUBLE:
-
-                for(int i = 0; i < og_size; i++)
-                    ((double*) new_v->array)[i] = ((double*) v->array)[i];
-
-                memcpy((double*)(v->array + og_size * data_size), (double*)data, data_size);
-                return v;
-
-            default:
-
-                free(v);
-                free(new_v);
-                return NULL;
-        }
-
-        return v;
+        return new_v;
     }
 }
 
 /**
  * @brief Replace the value at a given vector position.
  * If you have v->fixed_length == true and index == size, or
- * if index >= size or data == NULL. it will return false. 
+ * if index >= size or data == NULL. it will return false.
  * Otherwise, it will return true.
  *
  * @param data Data to replace current data. Is not type-checked.
@@ -275,40 +209,10 @@ bool replace(const void* data, int index, vec* v) {
     if (index >= v->size || v->data_type == NO_TYPE) return false;
 
     // Insert
-    int size = v->size;
     size_t data_size = get_data_size(v->data_type);
 
-    switch (v->data_type) {
-
-        case CHAR:
-
-            memcpy((char*)(v->array + size * data_size), (char*)data, data_size);
-            return true;
-
-        case INT32:
-
-            memcpy((int32_t*)(v->array + size * data_size), (int32_t*)data, data_size);
-            return true;
-
-        case INT64:
-
-            memcpy((int64_t*)(v->array + size * data_size), (int64_t*)data, data_size);
-            return true;
-
-        case FLOAT32:
-
-            memcpy((float*)(v->array + size * data_size), (float*)data, data_size);
-            return true;
-
-        case DOUBLE:
-
-            memcpy((double*)(v->array + size * data_size), (double*)data, data_size);
-            return true;
-
-        default:
-            return false;
-    }
-    return v;
+    memcpy(v->array + index * data_size, data, data_size);
+    return true;
 }
 
 /**
@@ -393,7 +297,7 @@ void* get_deep(int index, vec* v) {
     void* data_cpy = malloc(data_size);
     if (data_cpy == NULL) return NULL;
 
-    return (void*) memcpy(data_cpy, v->array + index * data_size, data_size);
+    return (void*)memcpy(data_cpy, v->array + index * data_size, data_size);
 }
 
 /**
@@ -507,10 +411,10 @@ vec* downsize(vec* v) {
 void free_vec(vec* v) {
 
     if (v == NULL) return;
-    else if (v->array == NULL) { 
-        
-        free(v); 
-        return; 
+    else if (v->array == NULL) {
+
+        free(v);
+        return;
     }
 
     // Free the void pointer array
