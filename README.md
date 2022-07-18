@@ -19,3 +19,4 @@ C-Based Linear Algebra Library; a personal project of mine. Feel free to use in 
 - `LICENSE.md`: License for my project, currently `GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007`.
 - `README.md`: This.
 - `array_list.c|h`: My original arl project, not used (so far), but `vector.c|h` code is heavily borrowed from it.
+- `depricated/`: Where old scripts that either failed or are out-dated are stored.

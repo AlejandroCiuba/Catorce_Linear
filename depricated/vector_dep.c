@@ -40,7 +40,9 @@ vec* init_vec(int init_size, type data_type, bool fixed_length) {
     v->fixed_length = fixed_length;
 
     // Init the vector array
-    void* arrv = malloc(get_data_size(data_type) * init_size);
+    size_t data_size = get_data_size(data_type);
+
+    void* arrv = malloc(data_size * init_size);
     if (arrv == NULL) {
 
         free(v);
@@ -48,6 +50,12 @@ vec* init_vec(int init_size, type data_type, bool fixed_length) {
     }
 
     v->array = arrv;
+
+    // Now to do something scandelous, hoohoohoo!!!
+    int64_t zero = 0;
+    for (int i = 0; i < init_size; i++)
+        memcpy((char*)(v->array + i * data_size), (char*)&zero, data_size);
+
     return v;
 }
 

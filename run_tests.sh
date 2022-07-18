@@ -28,7 +28,7 @@ do
     for type in ${!DATA_TYPES[@]}
     do 
         echo "RUNNING VALGRIND FOR ${test} FOR TYPE ${DATA_TYPES[$type]}..."
-        valgrind --leak-check=full -s ./${test} -d ${type} -n 5
+        valgrind --leak-check=full --track-origins=yes -s ./${test} -d ${type} -n 5
         echo ""
     done
 
